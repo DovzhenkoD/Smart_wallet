@@ -204,7 +204,7 @@ Jiffies
 **ВВХМ**
 Результат для цієї платформи зображено на рисунки нижче: 
 
-	.. image:: img/results_bbxm.jpg
+	.. image:: img/results_bbxm.JPG
 
 :*початкове* значення ``jiffies``: 275207  
 :*друге* значення ``jiffies``: 335238
