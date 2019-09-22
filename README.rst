@@ -161,7 +161,7 @@ _____
   typedef struct struct_for_res_n {
 	struct list_head list;
 	int num;
-}struct_for_res;
+  }struct_for_res;
 	
 ``INIT_LIST_HEAD(&main_struct.list);`` - такий макрос об'являє змінну типу *struct list_head* з вказаним ім'ям, а також ініціалізує її.
 Замість даного макроса, можна використати *LIST_HEAD(mylist)*.
@@ -219,4 +219,5 @@ _____
 Якщо забрабти синхронізацію, буде наступний результат:
 
 .. image:: img/without_lock_x86.jpg
+
 
