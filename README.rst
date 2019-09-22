@@ -189,7 +189,7 @@ atomic_t *arg;
 
 .. code-block:: c
 
-atomic_t *ptr = (atomic_t *)kmalloc(sizeof(atomic_t), GFP_ATOMIC);
+	atomic_t *ptr = (atomic_t *)kmalloc(sizeof(atomic_t), GFP_ATOMIC);
 
 **Атомарні операціїї, які були використанні в л.р.**
 
@@ -205,15 +205,14 @@ atomic_t *ptr = (atomic_t *)kmalloc(sizeof(atomic_t), GFP_ATOMIC);
 
 .. code-block:: c
 
-static void lock(atomic_t *arg){
-	while(arch_atomic_xchg(arg, 1)){
-		schedule(); 	
+	static void lock(atomic_t *arg){
+		while(arch_atomic_xchg(arg, 1)){
+			schedule(); 	
+		}
 	}
-}
-
-static void unlock(atomic_t *arg){
-	arch_atomic_set(arg, 0);
-}
+	static void unlock(atomic_t *arg){
+		arch_atomic_set(arg, 0);
+	}
 
 
 Результати
