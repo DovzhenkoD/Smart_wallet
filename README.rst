@@ -3,7 +3,7 @@
 ==========================
 Звіт з лабораторної роботи
 ==========================
-Лабораторна робота №4: "        "
+Лабораторна робота №4: "Таймера та черги"
 ________________________________
 
 Зміст
@@ -72,6 +72,8 @@ Workqueue зовні схожі на tasklet; вони дають зможу к�
 
 Реалізацію таких черг можна розглянути дещо нижче - `Реалізація workqueue`_.
 
+Реалізація коду
+________________
 
 Реалізація timer
 ~~~~~~~~~~~~~~~~
@@ -82,7 +84,7 @@ Workqueue зовні схожі на tasklet; вони дають зможу к�
 
 .. code-block:: c
 
-timer_setup(&timer, &timer_func, 0);
+	timer_setup(&timer, &timer_func, 0);
 
 
 mod_timer()
@@ -129,11 +131,10 @@ struct delaned_work використовує таймер для запуску 
 
 .. code-block:: c
 
-DECLARE_WORK(name , void (*function)(struct work_struct *));
-DECLARE_DELAYED_WORK(name, void(*function)(struct work_struct *));
-
-INIT_WORK(struct work_struct *work, void(*function)(struct work_struct *));
-INIT_DELAYED_WORK(struct delayed_work *work, void(*function)(struct work_struct *));
+	DECLARE_WORK(name , void (*function)(struct work_struct *));
+	DECLARE_DELAYED_WORK(name, void(*function)(struct work_struct *));
+	INIT_WORK(struct work_struct *work, void(*function)(struct work_struct *));
+	INIT_DELAYED_WORK(struct delayed_work *work, void(*function)(struct work_struct *));
 
 За допомогою **DECLARE_WORK()** та **DECLARE_DELAYED_WORK()** оголошують та ініціалізують елемент структури, а завядки **INIT_WORK()** та **INIT_DELAYED_WORK()** ініціалізують вже задеклорований елемент *work*.
 
@@ -144,9 +145,9 @@ schedule_delayed_work()
 
 .. code-block:: c
 
-schedule_work(struct work_struct *work);
- or
-schedule_delayed_work(struct delayed_work *work, unsigned long delay);
+	schedule_work(struct work_struct *work);
+ 		or
+	schedule_delayed_work(struct delayed_work *work, unsigned long delay);
 
 В аргументи **schedule_delayed_work** задається сама структура, а також довжина затримки. Одиниця виміру часу затримки - **jiffies**.
 Повертає нуль, якщо *work* вже був у глобальній робочої черзі ядра, і ненульовий в іншому випадку відповідно.
@@ -159,7 +160,7 @@ flush_delayed_work()
 
 .. code-block:: c
 
-bool flush_delayed_work (struct delayed_work * dwork);
+	bool flush_delayed_work (struct delayed_work * dwork);
 
 Код роботи
 ___________
@@ -171,11 +172,11 @@ ___________
 
 .. code-block:: c
 
-struct flags_str {
-	bool thr_run[NUMBER_OF_KTHREADS];
-	bool timer_run;
-	bool work_run;
-};
+	struct flags_str {
+		bool thr_run[NUMBER_OF_KTHREADS];
+		bool timer_run;
+		bool work_run;
+	};
  
 Перший флаг відповідає за роботу потоків, а два наступних за роботу таймера і черги відповідно. Перший флаг допомогає вийти  з нескінченного циклу, у той час як наступні два використовуються для зручності подальшого вилучення модулю.
 
@@ -185,27 +186,27 @@ struct flags_str {
 
 .. code-block:: c
 
-void work_func(struct work_struct *data)
-{
-	long int jif_work = jiffies;
-	struct struct_result_of_kth *work_data;
-	if ((jif_work % 11) == 0) {
-		printk(KERN_INFO "\nElement/11 from work: %li, jiffies/11 = %li\n", jif_work, jif_work/11);
-	flags.thr_run[1] = false;
-	} else {
-		work_data = kmalloc(sizeof(*work_data), GFP_KERNEL);
-		if (work_data){
-			work_data->cnt = jif_work;
-			list_add(&work_data->list, &second_list.list);
+	void work_func(struct work_struct *data)
+	{
+		long int jif_work = jiffies;
+		struct struct_result_of_kth *work_data;
+		if ((jif_work % 11) == 0) {
+			printk(KERN_INFO "\nElement/11 from work: %li, jiffies/11 = %li\n", jif_work, jif_work/11);
+		flags.thr_run[1] = false;
 		} else {
-			printk(KERN_ERR "kmalloc didn`t allocate memory!\n");
-			thr_run[1] = false;
-		if (flags.work_run) {
-			schedule_delayed_work(&work, 17);
+			work_data = kmalloc(sizeof(*work_data), GFP_KERNEL);
+			if (work_data){
+				work_data->cnt = jif_work;
+				list_add(&work_data->list, &second_list.list);
+			} else {
+				printk(KERN_ERR "kmalloc didn`t allocate memory!\n");
+				thr_run[1] = false;
+			if (flags.work_run) {
+				schedule_delayed_work(&work, 17);
+			}
 		}
-	}
 
-}
+	}
 
 Завдяки цій функції буде виконуватися пошук **jiffies**, який кратний числу 11. За умовою лабораторної роботи, якщо відповідне число знайдеться, то потрібно зупинти відповідний поток, та вивести це значення в лог ядра. У функціх видно, що якщо число знайдено, тоді флаг, який відповідає за роботу першого потоку перейде у стан *false*. Якщо таке число не було знайдено, тоді функція добавляє наступний елемент у список, який відповідає за значення, що утворюються в другому потоці. Після цього за допомогою розглянутою вже функціїї `schedule_delayed_work()`_ виставляємо перезапуск ворка через **17 jiffies**.
 
@@ -215,44 +216,43 @@ void work_func(struct work_struct *data)
 
 .. code-block:: c
 
-int th_func(void *data)
-{
-	while (flags.thr_run[(int *)data]) {
-			schedule();
-	}
-
-	if ((int *)data == 0) goto TIMER_KTH;
-	if ((int *)data == 1) goto WORK_KTH;
-	
-	TIMER_KTH:
-		struct struct_result_of_kth *temp_t = NULL;
-		list_for_each_entry(temp_t, &(first_list.list), list) {
-		printk(KERN_NOTICE "\tThread - %i. Timer elements list #%li!\n", 
-			(int *)data, temp_t->cnt);
+	int th_func(void *data)
+	{
+		if ((int *)data == 0) goto TIMER_KTH;
+		if ((int *)data == 1) goto WORK_KTH;	
+		TIMER_KTH:
+			while (flags.thr_run[0]) {
+				schedule();
+			}
+			struct struct_result_of_kth *temp_t = NULL;
+			list_for_each_entry(temp_t, &(first_list.list), list) {
+			printk(KERN_NOTICE "\tThread - %i. Timer elements list #%li!\n", 
+				(int *)data, temp_t->cnt);
+			}
+			do_exit(1);
+			return 0;
+		WORK_KTH:
+			while (flags.thr_run[1]) {
+				schedule();
+			}
+			struct struct_result_of_kth *temp_w = NULL;
+			list_for_each_entry(temp_w, &(second_list.list), list) {
+				printk(KERN_NOTICE "\tThread - %i. Work elements list #%li!\n", 
+					(int *)data, temp_w->cnt);
+			}
+			do_exit(1);
+			return 0;
 		}
-		do_exit(1);
-
-
-	WORK_KTH:
-		struct struct_result_of_kth *temp_w = NULL;
-		list_for_each_entry(temp_w, &(second_list.list), list) {
-			printk(KERN_NOTICE "\tThread - %i. Work elements list #%li!\n", 
-				(int *)data, temp_w->cnt);
-		}
-		do_exit(1);
-		
 	
-}
-
 Перший кроком буде те що, за допомогою флагу, який відповідає за роботу потоків **thr_run** відбувається робота нескінченого циклу **while**, за допомогою якого відбувається передача прав на виконання для іншиї процесорів. Це використовується для того, щоб затримати наступне викоання функції для потоку, поки не настав потрібний час.
 
 для подальних дій потрібно, щоб програма розуміла з який саме потоком вона працює, оскільки їх є два, як вже вказано в умові: один відповідає за таймер, інший за ворк. Тому коли відбувається запуск потоків, передається і його номер:
 
 .. code-block:: c
 
-for (int i = 0; i < NUMBER_OF_KTHREADS; i ++) {
-		kthreads_ptr[i] = kthread_run(&th_func, (void *)i, "thread_%i", i);
-		flags.thr_run[i] = true;
+	for (int i = 0; i < NUMBER_OF_KTHREADS; i ++) {
+			kthreads_ptr[i] = kthread_run(&th_func, (void *)i, "thread_%i", i);
+			flags.thr_run[i] = true;
 	}
 
 Відповідно, знаючи номер ми переходимо до частини функції яка відповідає за обраний процес. 
