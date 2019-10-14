@@ -304,6 +304,13 @@ TODO: Add buffer write logic. Make sure seek operations work
 TODO: add ioctl to append magic phrase to buffer conents to make these bees twerk
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+Більш детально про дану функцію, можна прочитати -> `ioctl()`_.
+В файлі  `user_app_test.c <src>`__ викликаємо цю функцію, з операцією, яка означає, що використовується "магічна фраза", і саме вона буде записуватися в буфер.
+
+.. code-block:: c
+
+	ioctl(fd, BEES_TWERK, 0);
+
 TODO: add ioctl to select buffer size
 """""""""""""""""""""""""""""""""""""
 
