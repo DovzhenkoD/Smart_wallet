@@ -267,7 +267,7 @@ GDB може виконувати дії чотирьох основних ти�
 Використанні джерела
 ____________________
 
-..[1] https://www.kernel.org/doc/Documentation/filesystems/debugfs.txt
-..[2] https://wiki.gentoo.org/wiki/Kernel/Configuration
-..[3] https://mgalgs.github.io/2015/05/16/how-to-build-a-custom-linux-kernel-for-qemu-2015-edition.html
+.. [1] https://www.kernel.org/doc/Documentation/filesystems/debugfs.txt
+.. [2] https://wiki.gentoo.org/wiki/Kernel/Configuration
+.. [3] https://mgalgs.github.io/2015/05/16/how-to-build-a-custom-linux-kernel-for-qemu-2015-edition.html
 
